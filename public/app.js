@@ -2371,6 +2371,48 @@ $packages["runtime"] = (function() {
 	$pkg.$init = $init;
 	return $pkg;
 })();
+$packages["github.com/johanbrandhorst/gopherjs-json"] = (function() {
+	var $pkg = {}, $init, js, ptrType, Marshal;
+	js = $packages["github.com/gopherjs/gopherjs/js"];
+	ptrType = $ptrType(js.Error);
+	Marshal = function(o) {
+		var _tmp, _tmp$1, err, o, res, $deferred;
+		/* */ var $err = null; try { $deferred = []; $deferred.index = $curGoroutine.deferStack.length; $curGoroutine.deferStack.push($deferred);
+		res = "";
+		err = $ifaceNil;
+		$deferred.push([(function() {
+			var _tuple, e, e$1, ok;
+			e = $recover();
+			if ($interfaceIsEqual(e, $ifaceNil)) {
+				return;
+			}
+			_tuple = $assertType(e, ptrType, true);
+			e$1 = _tuple[0];
+			ok = _tuple[1];
+			if (ok) {
+				err = e$1;
+			} else {
+				$panic(e$1);
+			}
+		}), []]);
+		res = $internalize($global.JSON.stringify(o), $String);
+		_tmp = res;
+		_tmp$1 = err;
+		res = _tmp;
+		err = _tmp$1;
+		return [res, err];
+		/* */ } catch(err) { $err = err; } finally { $callDeferred($deferred, $err); if (!$curGoroutine.asleep) { return  [res, err]; } }
+	};
+	$pkg.Marshal = Marshal;
+	$init = function() {
+		$pkg.$init = function() {};
+		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = js.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.$init = $init;
+	return $pkg;
+})();
 $packages["github.com/oskca/gopherjs-dom"] = (function() {
 	var $pkg = {}, $init, js;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
@@ -12130,8 +12172,9 @@ $packages["honnef.co/go/js/xhr"] = (function() {
 	return $pkg;
 })();
 $packages["main"] = (function() {
-	var $pkg = {}, $init, js, vue, xhr, Model, Result, ptrType, ptrType$1, ptrType$2, main;
+	var $pkg = {}, $init, js, json, vue, xhr, Model, Result, ptrType, sliceType, ptrType$1, ptrType$2, main;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
+	json = $packages["github.com/johanbrandhorst/gopherjs-json"];
 	vue = $packages["github.com/oskca/gopherjs-vue"];
 	xhr = $packages["honnef.co/go/js/xhr"];
 	Model = $pkg.Model = $newType(0, $kindStruct, "main.Model", true, "main", true, function(Object_, Test_, MyResult_) {
@@ -12155,6 +12198,7 @@ $packages["main"] = (function() {
 		this.Object = Object_;
 	});
 	ptrType = $ptrType(Result);
+	sliceType = $sliceType($Uint8);
 	ptrType$1 = $ptrType(Model);
 	ptrType$2 = $ptrType(js.Object);
 	Model.ptr.prototype.Ping = function() {
@@ -12182,6 +12226,33 @@ $packages["main"] = (function() {
 		}), []);
 	};
 	Model.prototype.Ping = function() { return this.$val.Ping(); };
+	Model.ptr.prototype.Save = function() {
+		var _tuple, d, err, m, req;
+		m = this;
+		_tuple = json.Marshal($internalize(m.Object.my_result, ptrType).Object);
+		d = _tuple[0];
+		err = _tuple[1];
+		if (!($interfaceIsEqual(err, $ifaceNil))) {
+			$panic(err);
+		}
+		req = xhr.NewRequest("POST", "/save");
+		req.SetRequestHeader("Content-Type", "application/json");
+		$go((function $b() {
+			var _r, err$1, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; _r = $f._r; err$1 = $f.err$1; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			_r = req.Send((new sliceType($stringToBytes(d)))); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			err$1 = _r;
+			if (!($interfaceIsEqual(err$1, $ifaceNil))) {
+				$panic(err$1);
+			}
+			if (!((($parseInt(req.Object.status) >> 0) === 200))) {
+				$panic(new $jsObjectPtr(req.Object.response));
+			}
+			$s = -1; return;
+			/* */ } return; } if ($f === undefined) { $f = { $blk: $b }; } $f._r = _r; $f.err$1 = err$1; $f.$s = $s; $f.$r = $r; return $f;
+		}), []);
+	};
+	Model.prototype.Save = function() { return this.$val.Save(); };
 	main = function() {
 		var m;
 		m = new Model.ptr(new ($global.Object)(), "", ptrType.nil);
@@ -12191,15 +12262,16 @@ $packages["main"] = (function() {
 		console.log("OK");
 		m.Ping();
 	};
-	ptrType$1.methods = [{prop: "Ping", name: "Ping", pkg: "", typ: $funcType([], [], false)}];
+	ptrType$1.methods = [{prop: "Ping", name: "Ping", pkg: "", typ: $funcType([], [], false)}, {prop: "Save", name: "Save", pkg: "", typ: $funcType([], [], false)}];
 	Model.init("", [{prop: "Object", name: "Object", anonymous: true, exported: true, typ: ptrType$2, tag: ""}, {prop: "Test", name: "Test", anonymous: false, exported: true, typ: $String, tag: "js:\"test\""}, {prop: "MyResult", name: "MyResult", anonymous: false, exported: true, typ: ptrType, tag: "js:\"my_result\""}]);
 	Result.init("", [{prop: "Object", name: "Object", anonymous: true, exported: true, typ: ptrType$2, tag: ""}]);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = js.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = vue.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = xhr.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = json.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = vue.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = xhr.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		if ($pkg === $mainPkg) {
 			main();
 			$mainFinished = true;

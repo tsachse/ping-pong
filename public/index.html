@@ -15,8 +15,9 @@
   <div class="container-fluid">
     <div id="app">
      <h3>{{  test }}</h3>
-     <p>Der Server sagt <b>{{ my_result.message}}</b>.</p>
-
+    <div>Message: {{ my_result.message }} <input v-model="my_result.message"></input>  </div>
+    <div>Neues Feld: {{ my_result.neuesfeld }} <input v-model="my_result.neuesfeld"></input>  </div>
+    <button v-on:click="Save">Save</button>
     </div>
   </div>
 
