@@ -7,8 +7,8 @@ import (
 )
 
 type PingPong struct {
-	Message   string `json: "message"`
-	NeuesFeld string `json: "neuesfeld"`
+	Message   string `json:"message"`
+	NeuesFeld string `json:"neues_feld"`
 }
 
 func main() {
@@ -16,21 +16,20 @@ func main() {
 	r.Static("/public", "./public")
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message":   "pong",
-			"neuesfeld": "Hey",
+			"message":    "pong",
+			"neues_feld": "Hey",
 		})
 	})
 	r.POST("/save", func(c *gin.Context) {
 		var p PingPong
-		// scheinbar funktioniert BindJSON mit Feldname mit Underscore nicht
-		// z.B. neues_feld
+
 		c.BindJSON(&p)
 
 		c.JSON(200, gin.H{
-			"message":   p.Message,
-			"neuesfeld": p.NeuesFeld,
+			"message":    p.Message,
+			"neues_feld": p.NeuesFeld,
 		})
-		fmt.Printf("message: %s, neues_feld: %s\n", p.Message, p.NeuesFeld)
+		fmt.Printf("Message: %s, NeuesFeld: %s\n", p.Message, p.NeuesFeld)
 		fmt.Printf("%v\n", p)
 	})
 	r.Run(":3000") // listen and serve on 0.0.0.0:3000

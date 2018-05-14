@@ -94,19 +94,19 @@ var $ifaceMethodExpr = function(name) {
 };
 
 var $subslice = function(slice, low, high, max) {
-  if (high === undefined) {
-    high = slice.$length;
-  }
-  if (max === undefined) {
-    max = slice.$capacity;
-  }
   if (low < 0 || high < low || max < high || high > slice.$capacity || max > slice.$capacity) {
     $throwRuntimeError("slice bounds out of range");
   }
   var s = new slice.constructor(slice.$array);
   s.$offset = slice.$offset + low;
-  s.$length = high - low;
-  s.$capacity = max - low;
+  s.$length = slice.$length - low;
+  s.$capacity = slice.$capacity - low;
+  if (high !== undefined) {
+    s.$length = high - low;
+  }
+  if (max !== undefined) {
+    s.$capacity = max - low;
+  }
   return s;
 };
 
@@ -11108,7 +11108,7 @@ $packages["sync/atomic"] = (function() {
 	return $pkg;
 })();
 $packages["sync"] = (function() {
-	var $pkg = {}, $init, js, race, runtime, atomic, Pool, Mutex, poolLocalInternal, poolLocal, notifyList, ptrType, sliceType, ptrType$1, chanType, sliceType$1, ptrType$6, ptrType$7, sliceType$4, funcType, ptrType$16, arrayType$2, semWaiters, semAwoken, expunged, allPools, runtime_registerPoolCleanup, runtime_SemacquireMutex, runtime_Semrelease, runtime_notifyListCheck, runtime_canSpin, runtime_nanotime, throw$1, poolCleanup, init, indexLocal, init$1, runtime_doSpin;
+	var $pkg = {}, $init, js, race, runtime, atomic, Pool, Mutex, poolLocalInternal, poolLocal, notifyList, ptrType, sliceType, ptrType$1, chanType, sliceType$1, ptrType$6, ptrType$7, sliceType$4, funcType, ptrType$16, arrayType$2, semWaiters, semAwoken, expunged, allPools, runtime_registerPoolCleanup, runtime_SemacquireMutex, runtime_Semrelease, runtime_notifyListCheck, runtime_canSpin, runtime_nanotime, poolCleanup, init, indexLocal, init$1, runtime_doSpin;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	race = $packages["internal/race"];
 	runtime = $packages["runtime"];
@@ -11271,10 +11271,6 @@ $packages["sync"] = (function() {
 	runtime_nanotime = function() {
 		return $mul64($internalize(new ($global.Date)().getTime(), $Int64), new $Int64(0, 1000000));
 	};
-	throw$1 = function(s) {
-		var s;
-		$throwRuntimeError($externalize(s, $String));
-	};
 	Mutex.ptr.prototype.Lock = function() {
 		var awoke, delta, iter, m, new$1, old, queueLifo, starving, waitStartTime, x, x$1, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; awoke = $f.awoke; delta = $f.delta; iter = $f.iter; m = $f.m; new$1 = $f.new$1; old = $f.old; queueLifo = $f.queueLifo; starving = $f.starving; waitStartTime = $f.waitStartTime; x = $f.x; x$1 = $f.x$1; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -11314,7 +11310,7 @@ $packages["sync"] = (function() {
 			}
 			if (awoke) {
 				if ((new$1 & 2) === 0) {
-					throw$1("sync: inconsistent mutex state");
+					$panic(new $String("sync: inconsistent mutex state"));
 				}
 				new$1 = (new$1 & ~(2)) >> 0;
 			}
@@ -11333,7 +11329,7 @@ $packages["sync"] = (function() {
 				old = m.state;
 				if (!(((old & 4) === 0))) {
 					if (!(((old & 3) === 0)) || ((old >> 3 >> 0) === 0)) {
-						throw$1("sync: inconsistent mutex state");
+						$panic(new $String("sync: inconsistent mutex state"));
 					}
 					delta = -7;
 					if (!starving || ((old >> 3 >> 0) === 1)) {
@@ -11366,7 +11362,7 @@ $packages["sync"] = (function() {
 		}
 		new$1 = atomic.AddInt32((m.$ptr_state || (m.$ptr_state = new ptrType$6(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), -1);
 		if ((((new$1 + 1 >> 0)) & 1) === 0) {
-			throw$1("sync: unlock of unlocked mutex");
+			$panic(new $String("sync: unlock of unlocked mutex"));
 		}
 		/* */ if ((new$1 & 4) === 0) { $s = 1; continue; }
 		/* */ $s = 2; continue;
@@ -11466,16 +11462,14 @@ $packages["sync"] = (function() {
 	return $pkg;
 })();
 $packages["io"] = (function() {
-	var $pkg = {}, $init, errors, sync, atomic, errWhence, errOffset;
+	var $pkg = {}, $init, errors, sync, errWhence, errOffset;
 	errors = $packages["errors"];
 	sync = $packages["sync"];
-	atomic = $packages["sync/atomic"];
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = sync.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = atomic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$pkg.ErrShortWrite = errors.New("short write");
 		$pkg.ErrShortBuffer = errors.New("short buffer");
 		$pkg.EOF = errors.New("EOF");
