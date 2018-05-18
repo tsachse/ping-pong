@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"go/build"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +15,14 @@ type PingPong struct {
 
 func main() {
 	r := gin.Default()
-	r.Static("/public", "./public")
+	// r.Static("/public", "./public")
+	r.Use(static.Serve("/", static.LocalFile("./public", true)))
+
+	// damit der Debugger im Browser verwendet werden kann, werden hier die
+	// GO-Quellen als Static-Daten zur Verfügung gestellt
+	r.Use(static.Serve("/", static.LocalFile(build.Default.GOPATH+"/src", false)))
+	r.Use(static.Serve("/", static.LocalFile(build.Default.GOROOT+"/src", false)))
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message":    "pong",
