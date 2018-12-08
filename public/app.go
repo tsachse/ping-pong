@@ -14,6 +14,7 @@ type Model struct {
 	*js.Object         // this is needed for bidirectional data bindings
 	Test       string  `js:"test"`
 	MyResult   *Result `js:"my_result"`
+	Page       string `js:"page"`
 	//NeuesFeld  string  `js:"neues_feld"`
 }
 
@@ -82,6 +83,8 @@ func main() {
 	// funktioniert der Zugriff später aus der View nicht
 	m.Test = "beta"
 	// m.NeuesFeld = ""
+	//m.Page = "http://localhost:3001/chef"
+	m.Page = "http://kr2-devel02.osp-dd.de:9502/nutzer"
 
 	// hier ein JS Object zugewiesen werden, damit später auf die
 	// Felder der JSON-Nachrivt zugegriffen werden kann

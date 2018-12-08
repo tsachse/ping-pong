@@ -18,6 +18,16 @@
     <div>Message: {{ my_result.message }} <input v-model="my_result.message"></input>  </div>
     <div>Neues Feld: {{ my_result.neues_feld }} <input v-model="my_result.neues_feld"></input>  </div>
     <button v-on:click="Save">Save</button>
+
+    <div>
+      {{ page }}
+    </div>
+
+    <div>
+      <iframe width="90%" style="position: absolute; height: 90%; border: none" :src="my_result.neues_feld" frameborder="0" allowfullscreen>
+      </iframe
+    </div>
+
     </div>
   </div>
 

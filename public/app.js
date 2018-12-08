@@ -94,19 +94,19 @@ var $ifaceMethodExpr = function(name) {
 };
 
 var $subslice = function(slice, low, high, max) {
+  if (high === undefined) {
+    high = slice.$length;
+  }
+  if (max === undefined) {
+    max = slice.$capacity;
+  }
   if (low < 0 || high < low || max < high || high > slice.$capacity || max > slice.$capacity) {
     $throwRuntimeError("slice bounds out of range");
   }
   var s = new slice.constructor(slice.$array);
   s.$offset = slice.$offset + low;
-  s.$length = slice.$length - low;
-  s.$capacity = slice.$capacity - low;
-  if (high !== undefined) {
-    s.$length = high - low;
-  }
-  if (max !== undefined) {
-    s.$capacity = max - low;
-  }
+  s.$length = high - low;
+  s.$capacity = max - low;
   return s;
 };
 
@@ -11108,7 +11108,7 @@ $packages["sync/atomic"] = (function() {
 	return $pkg;
 })();
 $packages["sync"] = (function() {
-	var $pkg = {}, $init, js, race, runtime, atomic, Pool, Mutex, poolLocalInternal, poolLocal, notifyList, ptrType, sliceType, ptrType$1, chanType, sliceType$1, ptrType$6, ptrType$7, sliceType$4, funcType, ptrType$16, arrayType$2, semWaiters, semAwoken, expunged, allPools, runtime_registerPoolCleanup, runtime_SemacquireMutex, runtime_Semrelease, runtime_notifyListCheck, runtime_canSpin, runtime_nanotime, poolCleanup, init, indexLocal, init$1, runtime_doSpin;
+	var $pkg = {}, $init, js, race, runtime, atomic, Pool, Mutex, poolLocalInternal, poolLocal, notifyList, ptrType, sliceType, ptrType$1, chanType, sliceType$1, ptrType$6, ptrType$7, sliceType$4, funcType, ptrType$16, arrayType$2, semWaiters, semAwoken, expunged, allPools, runtime_registerPoolCleanup, runtime_SemacquireMutex, runtime_Semrelease, runtime_notifyListCheck, runtime_canSpin, runtime_nanotime, throw$1, poolCleanup, init, indexLocal, init$1, runtime_doSpin;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	race = $packages["internal/race"];
 	runtime = $packages["runtime"];
@@ -11271,6 +11271,10 @@ $packages["sync"] = (function() {
 	runtime_nanotime = function() {
 		return $mul64($internalize(new ($global.Date)().getTime(), $Int64), new $Int64(0, 1000000));
 	};
+	throw$1 = function(s) {
+		var s;
+		$throwRuntimeError($externalize(s, $String));
+	};
 	Mutex.ptr.prototype.Lock = function() {
 		var awoke, delta, iter, m, new$1, old, queueLifo, starving, waitStartTime, x, x$1, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; awoke = $f.awoke; delta = $f.delta; iter = $f.iter; m = $f.m; new$1 = $f.new$1; old = $f.old; queueLifo = $f.queueLifo; starving = $f.starving; waitStartTime = $f.waitStartTime; x = $f.x; x$1 = $f.x$1; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -11310,7 +11314,7 @@ $packages["sync"] = (function() {
 			}
 			if (awoke) {
 				if ((new$1 & 2) === 0) {
-					$panic(new $String("sync: inconsistent mutex state"));
+					throw$1("sync: inconsistent mutex state");
 				}
 				new$1 = (new$1 & ~(2)) >> 0;
 			}
@@ -11329,7 +11333,7 @@ $packages["sync"] = (function() {
 				old = m.state;
 				if (!(((old & 4) === 0))) {
 					if (!(((old & 3) === 0)) || ((old >> 3 >> 0) === 0)) {
-						$panic(new $String("sync: inconsistent mutex state"));
+						throw$1("sync: inconsistent mutex state");
 					}
 					delta = -7;
 					if (!starving || ((old >> 3 >> 0) === 1)) {
@@ -11362,7 +11366,7 @@ $packages["sync"] = (function() {
 		}
 		new$1 = atomic.AddInt32((m.$ptr_state || (m.$ptr_state = new ptrType$6(function() { return this.$target.state; }, function($v) { this.$target.state = $v; }, m))), -1);
 		if ((((new$1 + 1 >> 0)) & 1) === 0) {
-			$panic(new $String("sync: unlock of unlocked mutex"));
+			throw$1("sync: unlock of unlocked mutex");
 		}
 		/* */ if ((new$1 & 4) === 0) { $s = 1; continue; }
 		/* */ $s = 2; continue;
@@ -11462,14 +11466,16 @@ $packages["sync"] = (function() {
 	return $pkg;
 })();
 $packages["io"] = (function() {
-	var $pkg = {}, $init, errors, sync, errWhence, errOffset;
+	var $pkg = {}, $init, errors, sync, atomic, errWhence, errOffset;
 	errors = $packages["errors"];
 	sync = $packages["sync"];
+	atomic = $packages["sync/atomic"];
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = errors.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = sync.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = atomic.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$pkg.ErrShortWrite = errors.New("short write");
 		$pkg.ErrShortBuffer = errors.New("short buffer");
 		$pkg.EOF = errors.New("EOF");
@@ -12171,17 +12177,19 @@ $packages["main"] = (function() {
 	json = $packages["github.com/johanbrandhorst/gopherjs-json"];
 	vue = $packages["github.com/oskca/gopherjs-vue"];
 	xhr = $packages["honnef.co/go/js/xhr"];
-	Model = $pkg.Model = $newType(0, $kindStruct, "main.Model", true, "main", true, function(Object_, Test_, MyResult_) {
+	Model = $pkg.Model = $newType(0, $kindStruct, "main.Model", true, "main", true, function(Object_, Test_, MyResult_, Page_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.Object = null;
 			this.Test = "";
 			this.MyResult = ptrType.nil;
+			this.Page = "";
 			return;
 		}
 		this.Object = Object_;
 		this.Test = Test_;
 		this.MyResult = MyResult_;
+		this.Page = Page_;
 	});
 	Result = $pkg.Result = $newType(0, $kindStruct, "main.Result", true, "main", true, function(Object_) {
 		this.$val = this;
@@ -12249,15 +12257,16 @@ $packages["main"] = (function() {
 	Model.prototype.Save = function() { return this.$val.Save(); };
 	main = function() {
 		var m;
-		m = new Model.ptr(new ($global.Object)(), "", ptrType.nil);
+		m = new Model.ptr(new ($global.Object)(), "", ptrType.nil, "");
 		m.Object.test = $externalize("beta", $String);
+		m.Object.page = $externalize("http://kr2-devel02.osp-dd.de:9502/nutzer", $String);
 		m.Object.my_result = $externalize(new Result.ptr(new ($global.Object)()), ptrType);
 		vue.New(new $String("#app"), m);
 		console.log("OK");
 		m.Ping();
 	};
 	ptrType$1.methods = [{prop: "Ping", name: "Ping", pkg: "", typ: $funcType([], [], false)}, {prop: "Save", name: "Save", pkg: "", typ: $funcType([], [], false)}];
-	Model.init("", [{prop: "Object", name: "Object", anonymous: true, exported: true, typ: ptrType$2, tag: ""}, {prop: "Test", name: "Test", anonymous: false, exported: true, typ: $String, tag: "js:\"test\""}, {prop: "MyResult", name: "MyResult", anonymous: false, exported: true, typ: ptrType, tag: "js:\"my_result\""}]);
+	Model.init("", [{prop: "Object", name: "Object", anonymous: true, exported: true, typ: ptrType$2, tag: ""}, {prop: "Test", name: "Test", anonymous: false, exported: true, typ: $String, tag: "js:\"test\""}, {prop: "MyResult", name: "MyResult", anonymous: false, exported: true, typ: ptrType, tag: "js:\"my_result\""}, {prop: "Page", name: "Page", anonymous: false, exported: true, typ: $String, tag: "js:\"page\""}]);
 	Result.init("", [{prop: "Object", name: "Object", anonymous: true, exported: true, typ: ptrType$2, tag: ""}]);
 	$init = function() {
 		$pkg.$init = function() {};
